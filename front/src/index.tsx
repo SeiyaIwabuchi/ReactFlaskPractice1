@@ -6,7 +6,7 @@ import GenericTemplate from './GenericTemplate';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
-ReactDOM.render(
+/*ReactDOM.render(
   <React.StrictMode>
     <Router>
       <Switch>
@@ -20,6 +20,14 @@ ReactDOM.render(
         <Route path="/asdf" component={App} exact />
       </Switch>
     </Router>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+*/
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App/>
   </React.StrictMode>,
   document.getElementById('root')
 );
