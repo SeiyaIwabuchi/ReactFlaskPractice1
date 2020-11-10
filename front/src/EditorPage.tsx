@@ -9,7 +9,6 @@ import AddIcon from '@material-ui/icons/Add';
 import { dark } from '@material-ui/core/styles/createPalette';
 import { Palette } from '@material-ui/icons';
 import { Console } from 'console';
-import { Link } from 'react-router-dom';
 
 const fontFamily = [
   "Noto Sans JP",
@@ -73,9 +72,6 @@ const useStyles = makeStyles((theme) => ({
     position: 'fixed',
     bottom: theme.spacing(2),
     right: theme.spacing(2),
-  },
-  LinkSize:{
-    width:"100%",
   },
 }));
 
@@ -154,7 +150,6 @@ interface PaperListItemProps{
     paperTypoTitleSize: string | undefined;
     paperTypoBodySize: string | undefined;
     listItemSize: string | undefined;
-    LinkSize:string | undefined;
   }
   handleClick:() => void;
 }
@@ -162,16 +157,14 @@ interface PaperListItemProps{
 function PaperListItem(props:PaperListItemProps){
   return(
     <ListItem className={props.classes.listItemSize}>
-      <Link to="./editor" className={props.classes.LinkSize}>
-        <Paper className={props.classes.paperSize} onClick={props.handleClick}>
-          <Typography className={props.classes.paperTypoTitleSize} variant="h5" noWrap>
-            見出し
-          </Typography>
-          <Typography className={props.classes.paperTypoBodySize} variant="body1" noWrap>
-            内容:hogehogehogehogehogehogehogehogehogrhogrhogr
-          </Typography>
-        </Paper>
-      </Link>
+      <Paper className={props.classes.paperSize} onClick={props.handleClick}>
+        <Typography className={props.classes.paperTypoTitleSize} variant="h5" noWrap>
+          見出し
+        </Typography>
+        <Typography className={props.classes.paperTypoBodySize} variant="body1" noWrap>
+          内容:hogehogehogehogehogehogehogehogehogrhogrhogr
+        </Typography>
+      </Paper>
     </ListItem>
   );
 }
@@ -182,7 +175,6 @@ interface CreatePaperItemsProps{
     paperTypoTitleSize: string | undefined;
     paperTypoBodySize: string | undefined;
     listItemSize: string | undefined;
-    LinkSize: string | undefined;
   }
   handleClick:() => void;
 }
@@ -192,6 +184,8 @@ function CreatePaperItems(props:CreatePaperItemsProps){
   for(let i=0;i<10;i++){
     itemList.push(PaperListItem({classes:props.classes,handleClick:props.handleClick}))
   }
+  console.log("awqwewe");
+  console.log(itemList);
   return(<>
     {itemList}
   </>
@@ -209,15 +203,7 @@ function Body(props:BodyProps){
     <div>
       <div className={classes.appBarSpacer} />
           <Container>
-            <TextField label="検索" className={classes.SearchfieldSize}/>
-            <List style={{maxHeight: '100%', overflow: 'auto'}}>
-              <CreatePaperItems classes={classes} handleClick={() =>{props.handleClick();props.snackbarTextHandle("編集画面へ遷移")}}/>
-            </List>
-            <Link to="./editor">
-              <Fab color="primary" aria-label="add" className={classes.fab}>
-                <AddIcon />
-              </Fab>
-            </Link>
+            
           </Container>
     </div>
   );

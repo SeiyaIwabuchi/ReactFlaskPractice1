@@ -2,35 +2,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import GenericTemplate from './GenericTemplate';
 import reportWebVitals from './reportWebVitals';
+import Editor from './EditorPage';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
-/*ReactDOM.render(
+ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <Switch>
-        <Route path="/" component={() => {
-          return(
-            <GenericTemplate title="メモメモメ">
-              <>メモメモメ</>
-            </GenericTemplate>
-          );
-        }} exact />
-        <Route path="/asdf" component={App} exact />
-      </Switch>
+        <Route path="/" component={App} exact />
+        <Route path="/editor" component={Editor} exact />
     </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );
-*/
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App/>
-  </React.StrictMode>,
-  document.getElementById('root')
-);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
