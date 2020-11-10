@@ -215,7 +215,7 @@ function Body(props:BodyProps){
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
               <CreatePaperItems classes={classes} handleClick={() =>{props.handleClick();props.snackbarTextHandle("編集画面へ遷移")}}/>
             </List>
-            <Link to="./editor">
+            <Link to="/editor">
               <Fab color="primary" aria-label="add" className={classes.fab}>
                 <AddIcon />
               </Fab>
