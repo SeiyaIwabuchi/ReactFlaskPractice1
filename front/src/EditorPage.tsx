@@ -1,14 +1,16 @@
 import React from 'react';
 import Axios from 'axios';
-import { AppBar, Button, Container, CssBaseline, Fab, IconButton, List, ListItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, Container, CssBaseline, Fab, IconButton, Input, List, ListItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles'
 import CloseIcon from '@material-ui/icons/Close';
 import * as Colors from '@material-ui/core/colors';
 import MenuIcon from '@material-ui/icons/Menu';
 import AddIcon from '@material-ui/icons/Add';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { dark } from '@material-ui/core/styles/createPalette';
 import { Palette } from '@material-ui/icons';
 import { Console } from 'console';
+import { Link } from 'react-router-dom';
 
 const fontFamily = [
   "Noto Sans JP",
@@ -39,6 +41,7 @@ const theme = createMuiTheme({
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    height:"100%",
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -59,10 +62,15 @@ const useStyles = makeStyles((theme) => ({
     paddingTop:5,
   },
   paperSize:{
+    margin:"1%",
+    marginTop:"5%",
     width:"100%",
+    height:"auto",
+    padding:"1%",
   },
   paperTypoTitleSize:{
-    padding:"1%",
+    margin:"1%",
+    
   },
   paperTypoBodySize:{
     margin:"1%",
@@ -129,12 +137,14 @@ function Header(props:HeaderProps){
     <header>
       <AppBar className={classes.appBar} position="fixed">
         <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={() => {
-            props.handleClick();
-            props.snackbarTextHandle("メニュー表示");
-          }}>
-            <MenuIcon />
-          </IconButton>
+          <Link to="/" style={{textDecoration:"none"}}>
+            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={() => {
+              props.handleClick();
+              props.snackbarTextHandle("メニュー表示");
+            }}>
+              <ArrowBackIcon color="action" />
+            </IconButton>
+          </Link>
           <Typography variant="h6" className={classes.title}>
             メモメモメ
           </Typography>
@@ -203,7 +213,26 @@ function Body(props:BodyProps){
     <div>
       <div className={classes.appBarSpacer} />
           <Container>
-            
+          <Paper className={classes.paperSize}>
+          <TextField
+            label="Title" 
+            style={{
+              margin:"1%",
+              width:"98%",
+            }}
+          />
+          <br/>
+          <TextField
+            label="Body"
+            multiline
+            variant="outlined"
+            style={{
+              marginTop:"2%",
+              marginBottom:"2%",
+              width:"100%",
+            }}
+          />
+          </Paper>
           </Container>
     </div>
   );
