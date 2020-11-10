@@ -67,7 +67,8 @@ const useStyles = makeStyles((theme) => ({
   },
   paperTypoBodySize:{
     margin:"1%",
-    marginTop:"-1%",
+    marginTop:"1%",
+    paddingBottom:"1%",
   },
   fab: {
     position: 'fixed',
@@ -76,6 +77,7 @@ const useStyles = makeStyles((theme) => ({
   },
   LinkSize:{
     width:"100%",
+    textDecoration:"none",
   },
 }));
 
@@ -162,7 +164,7 @@ interface PaperListItemProps{
 function PaperListItem(props:PaperListItemProps){
   return(
     <ListItem className={props.classes.listItemSize}>
-      <Link to="./editor" className={props.classes.LinkSize}>
+      <Link to="/editor" className={props.classes.LinkSize}>
         <Paper className={props.classes.paperSize} onClick={props.handleClick}>
           <Typography className={props.classes.paperTypoTitleSize} variant="h5" noWrap>
             見出し

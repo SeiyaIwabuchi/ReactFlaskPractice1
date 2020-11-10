@@ -9,8 +9,10 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-        <Route path="/" component={App} exact />
-        <Route path="/editor" component={Editor} exact />
+        <Switch>
+          <Route exact path="/" component={App} />
+          <Route path="/editor" component={Editor} />
+        </Switch>
     </Router>
   </React.StrictMode>,
   document.getElementById('root')
