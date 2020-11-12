@@ -1,5 +1,4 @@
-import React from 'react';
-import Axios from 'axios';
+import React, { useState } from 'react';
 import { AppBar, Button, Container, CssBaseline, Fab, IconButton, Input, List, ListItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles'
 import CloseIcon from '@material-ui/icons/Close';
@@ -125,9 +124,15 @@ function SimpleSnackbar() {
   );
 }
 
+class MemoData{
+  title:string = "";
+  body:string = "";
+}
+
 interface HeaderProps{
   handleClick:()=>void;
   snackbarTextHandle:(snackbarText:string) => void;
+  memoData:MemoData;
 }
 
 function Header(props:HeaderProps){
@@ -139,8 +144,18 @@ function Header(props:HeaderProps){
         <Toolbar>
           <Link to="/" style={{textDecoration:"none"}}>
             <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={() => {
+              console.log(props.memoData);
               props.handleClick();
               props.snackbarTextHandle("メニュー表示");
+              fetch("http://localhost:8080/",{
+                method:"POST",
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({title:props.memoData.title,body:props.memoData.body}),
+              })
+              .then(response => response.json())
+              .catch((error) => {console.log(error)});
             }}>
               <ArrowBackIcon color="action" />
             </IconButton>
@@ -154,61 +169,16 @@ function Header(props:HeaderProps){
   );
 }
 
-interface PaperListItemProps{
-  classes:{
-    paperSize: string | undefined;
-    paperTypoTitleSize: string | undefined;
-    paperTypoBodySize: string | undefined;
-    listItemSize: string | undefined;
-  }
-  handleClick:() => void;
-}
-
-function PaperListItem(props:PaperListItemProps){
-  return(
-    <ListItem className={props.classes.listItemSize}>
-      <Paper className={props.classes.paperSize} onClick={props.handleClick}>
-        <Typography className={props.classes.paperTypoTitleSize} variant="h5" noWrap>
-          見出し
-        </Typography>
-        <Typography className={props.classes.paperTypoBodySize} variant="body1" noWrap>
-          内容:hogehogehogehogehogehogehogehogehogrhogrhogr
-        </Typography>
-      </Paper>
-    </ListItem>
-  );
-}
-
-interface CreatePaperItemsProps{
-  classes:{
-    paperSize: string | undefined;
-    paperTypoTitleSize: string | undefined;
-    paperTypoBodySize: string | undefined;
-    listItemSize: string | undefined;
-  }
-  handleClick:() => void;
-}
-
-function CreatePaperItems(props:CreatePaperItemsProps){
-  let itemList=[]
-  for(let i=0;i<10;i++){
-    itemList.push(PaperListItem({classes:props.classes,handleClick:props.handleClick}))
-  }
-  console.log("awqwewe");
-  console.log(itemList);
-  return(<>
-    {itemList}
-  </>
-    );
-}
-
 interface BodyProps{
   handleClick:() => void;
   snackbarTextHandle:(snackbarText:string) => void;
+  handleUpdateMemo:(title:string,body:string) => void;
 }
 
 function Body(props:BodyProps){
   const classes = useStyles();
+  const [titleText,setTitleText] = useState("");
+  const [bodyText,setBodyText] = useState("");
   return(
     <div>
       <div className={classes.appBarSpacer} />
@@ -220,6 +190,11 @@ function Body(props:BodyProps){
               margin:"1%",
               width:"98%",
             }}
+            value={titleText}
+            onChange={(event)=>{
+              setTitleText(event.target.value);
+              props.handleUpdateMemo(event.target.value,bodyText);
+            }}
           />
           <br/>
           <TextField
@@ -230,6 +205,11 @@ function Body(props:BodyProps){
               marginTop:"2%",
               marginBottom:"2%",
               width:"100%",
+            }}
+            value={bodyText}
+            onChange={(event)=>{
+              setBodyText(event.target.value);
+              props.handleUpdateMemo(titleText,event.target.value);
             }}
           />
           </Paper>
@@ -245,6 +225,7 @@ interface AppState{
 }
 
 class App extends React.Component<any,AppState>{
+  memodata:MemoData;
   constructor(props: AppState | Readonly<AppState>){
     super(props);
     this.state = {
@@ -254,6 +235,8 @@ class App extends React.Component<any,AppState>{
     };
     this.handleClose = this.handleClose.bind(this);
     this.setSnackbarText = this.setSnackbarText.bind(this);
+    this.handleUpdateMemo = this.handleUpdateMemo.bind(this);
+    this.memodata = new MemoData();
   }
   setSnackbarText(text:string){
     this.setState({
@@ -269,6 +252,12 @@ class App extends React.Component<any,AppState>{
     }
     );
   };
+  handleUpdateMemo(title:string,body:string){
+    this.memodata.title = title;
+    this.memodata.body = body;
+    console.log(this.memodata.title,this.memodata.body);
+  }
+
   render(){
     return (
       <MuiThemeProvider theme={theme}>
@@ -294,9 +283,12 @@ class App extends React.Component<any,AppState>{
         <Header snackbarTextHandle={this.setSnackbarText} handleClick={() => {
           this.setState({
             open:true,
-          });
-        }}/>
-        <Body snackbarTextHandle={this.setSnackbarText} handleClick={()=>{this.setState({open:true})}}/>
+          }
+          );
+        }}
+        memoData={this.memodata}
+        />
+        <Body snackbarTextHandle={this.setSnackbarText} handleClick={()=>{this.setState({open:true})}} handleUpdateMemo={this.handleUpdateMemo}/>
       </div>
     </MuiThemeProvider>
     );
