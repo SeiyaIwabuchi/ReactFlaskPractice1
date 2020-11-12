@@ -1,16 +1,10 @@
-class MemoData:
-    def __init__(self):
-        self._title = ""
-        self._body = ""
-    
-    def setTitle(self,text:str):
-        self._title = text
-    
-    def setBody(self,text:str):
-        self._body = text
-
-    def getTitle(self) -> str:
-        return self._title
-
-    def getBody(self) -> str:
-        return self._body
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.schema import Column
+from sqlalchemy.types import Integer, String, DateTime
+Base=declarative_base()
+class MemoData(Base):
+    __tablename__="user" #テーブル名を指定
+    id=Column(Integer, primary_key=True)
+    title=Column(String(255))
+    body=Column(String(255))
+    datetime = Column(DateTime())
