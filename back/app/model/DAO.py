@@ -1,4 +1,7 @@
+from app.debug.Debug import Debug
 from sqlalchemy import create_engine
+import sqlalchemy
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, String, DateTime
@@ -6,11 +9,12 @@ import datetime
 from sqlalchemy.orm import sessionmaker
 from.MemoData import MemoData
 
-engine=create_engine("mysql://docker:docker@192.168.1.124:3306/test_database")
+engine=create_engine("mysql://docker:docker@192.168.1.124:3306/test_database?charset=utf8")
 Base=declarative_base()
-Base.metadata.create_all(engine)
+Base.metadata.create_all(bind=engine, checkfirst=False)
 SessionClass=sessionmaker(engine) #セッションを作るクラスを作成
 session=SessionClass()
+Debug.log("Complete database initialize.")
 
 def clearAll():
     #データクリア
@@ -19,7 +23,11 @@ def clearAll():
         session.commit()
 
 def insertOne(memoData:MemoData):
-    session.add(MemoData(title=memoData.title,body=memoData.body,datetime=memoData.datetime))
+    session.add(memoData)
+    try:
+        session.commit()
+    except ProgrammingError as e:
+        pass
 
 def getAll(memoData:MemoData):
     return session.query(MemoData).all()

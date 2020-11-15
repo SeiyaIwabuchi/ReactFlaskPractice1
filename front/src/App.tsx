@@ -159,18 +159,20 @@ interface PaperListItemProps{
     LinkSize:string | undefined;
   }
   handleClick:() => void;
+  memo:MemoData;
 }
 
 function PaperListItem(props:PaperListItemProps){
+  console.log(props.memo);
   return(
     <ListItem className={props.classes.listItemSize}>
       <Link to="/editor" className={props.classes.LinkSize}>
         <Paper className={props.classes.paperSize} onClick={props.handleClick}>
           <Typography className={props.classes.paperTypoTitleSize} variant="h5" noWrap>
-            見出し
+            {props.memo.title}
           </Typography>
           <Typography className={props.classes.paperTypoBodySize} variant="body1" noWrap>
-            内容:hogehogehogehogehogehogehogehogehogrhogrhogr
+            {props.memo.body}
           </Typography>
         </Paper>
       </Link>
@@ -187,13 +189,15 @@ interface CreatePaperItemsProps{
     LinkSize: string | undefined;
   }
   handleClick:() => void;
+  memoData:MemoData[];
 }
 
 function CreatePaperItems(props:CreatePaperItemsProps){
-  let itemList=[]
-  for(let i=0;i<10;i++){
-    itemList.push(PaperListItem({classes:props.classes,handleClick:props.handleClick}))
-  }
+  console.log(props.memoData);
+  let itemList: JSX.Element[]=[];
+  props.memoData.forEach((memo:MemoData) => {
+    itemList.push(PaperListItem({classes:props.classes,handleClick:props.handleClick,memo:memo}))
+  })
   return(<>
     {itemList}
   </>
@@ -203,9 +207,11 @@ function CreatePaperItems(props:CreatePaperItemsProps){
 interface BodyProps{
   handleClick:() => void;
   snackbarTextHandle:(snackbarText:string) => void;
+  memoData:MemoData[];
 }
 
 function Body(props:BodyProps){
+  console.log(props.memoData);
   const classes = useStyles();
   return(
     <div>
@@ -213,7 +219,7 @@ function Body(props:BodyProps){
           <Container>
             <TextField label="検索" className={classes.SearchfieldSize}/>
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
-              <CreatePaperItems classes={classes} handleClick={() =>{props.handleClick();props.snackbarTextHandle("編集画面へ遷移")}}/>
+              <CreatePaperItems classes={classes} memoData={props.memoData} handleClick={() =>{props.handleClick();props.snackbarTextHandle("編集画面へ遷移")}}/>
             </List>
             <Link to="/editor">
               <Fab color="primary" aria-label="add" className={classes.fab}>
@@ -225,22 +231,54 @@ function Body(props:BodyProps){
   );
 }
 
+class MemoData{
+  id: number;
+  title: string;
+  body: string;
+  datetime: string;
+  constructor(){
+    this.id = 0;
+    this.title = ""
+    this.body = "";
+    this.datetime = "";
+  }
+}
+
 interface AppState{
   open:boolean;
   snackbarText:string;
   snackbarTextHandle:(snackbarText:string) => void;
+  jsonData : MemoData[];
 }
 
 class App extends React.Component<any,AppState>{
+  
   constructor(props: AppState | Readonly<AppState>){
     super(props);
     this.state = {
       open:false,
       snackbarText:"",
       snackbarTextHandle:this.setSnackbarText,
+      jsonData:[],
     };
     this.handleClose = this.handleClose.bind(this);
     this.setSnackbarText = this.setSnackbarText.bind(this);
+    fetch("http://localhost:8080/getAll",{
+      method:"GET"
+    })
+    .then(response => response.json())
+    .then((data:MemoData[]) => {
+      this.setJsonData(data);
+    })
+    .catch((error) => {
+      console.error('Error: ', error);
+    });
+  }
+  setJsonData(j:MemoData[]){
+    this.setState({
+      jsonData:j,
+    })
+    console.log(this.state.jsonData);
   }
   setSnackbarText(text:string){
     this.setState({
@@ -283,7 +321,7 @@ class App extends React.Component<any,AppState>{
             open:true,
           });
         }}/>
-        <Body snackbarTextHandle={this.setSnackbarText} handleClick={()=>{this.setState({open:true})}}/>
+        <Body snackbarTextHandle={this.setSnackbarText} memoData={this.state.jsonData} handleClick={()=>{this.setState({open:true})}}/>
       </div>
     </MuiThemeProvider>
     );

@@ -8,3 +8,11 @@ class MemoData(Base):
     title=Column(String(255))
     body=Column(String(255))
     datetime = Column(DateTime())
+
+    def toDict(self):
+        return {
+            "id":self.id,
+            "title":self.title,
+            "body":self.body,
+            "datetime":str(self.datetime)
+            }

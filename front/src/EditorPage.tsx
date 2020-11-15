@@ -147,15 +147,17 @@ function Header(props:HeaderProps){
               console.log(props.memoData);
               props.handleClick();
               props.snackbarTextHandle("メニュー表示");
-              fetch("http://localhost:8080/",{
-                method:"POST",
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({title:props.memoData.title,body:props.memoData.body}),
-              })
-              .then(response => response.json())
-              .catch((error) => {console.log(error)});
+              if(props.memoData.title != "" && props.memoData.body!= ""){
+                fetch("http://localhost:8080/",{
+                  method:"POST",
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({title:props.memoData.title,body:props.memoData.body}),
+                })
+                .then(response => response.json())
+                .catch((error) => {console.log(error)});
+              }
             }}>
               <ArrowBackIcon color="action" />
             </IconButton>
