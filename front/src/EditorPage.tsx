@@ -147,7 +147,7 @@ function Header(props:HeaderProps){
               console.log(props.memoData);
               props.handleClick();
               props.snackbarTextHandle("メニュー表示");
-              if(props.memoData.title != "" && props.memoData.body!= ""){
+              if(props.memoData.title !== "" && props.memoData.body !== ""){
                 fetch("http://localhost:8080/",{
                   method:"POST",
                   headers: {
