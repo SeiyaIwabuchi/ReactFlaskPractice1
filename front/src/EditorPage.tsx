@@ -144,7 +144,7 @@ function Header(props:HeaderProps){
               props.handleClick();
               props.snackbarTextHandle("メニュー表示");
               if(props.memoData.title !== "" && props.memoData.body !== ""){
-                fetch("http://192.168.1.5:8080/" + (props.editMode === "update"?"update":""),{
+                fetch("http://192.168.1.124:8080/" + (props.editMode === "update"?"update":""),{
                   method:"POST",
                   headers: {
                     'Content-Type': 'application/json',
