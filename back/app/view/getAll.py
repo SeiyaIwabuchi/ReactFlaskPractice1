@@ -11,8 +11,6 @@ mod_getAll = Blueprint("getAll",__name__)
 def index():
     memos = []
     for n in DAO.getAll(MemoData()):
-        Debug.log(n.toDict())
         memos.append(n.toDict())
     j = jsonify(memos)
-    Debug.log(j)
     return j

@@ -35,3 +35,11 @@ def getAll(memoData:MemoData):
 def deleteOne(memoData:MemoData):
     session.delete(memoData)
     session.commit()
+
+def updateOne(memoData:MemoData):
+    oldData:MemoData = session.query(MemoData).filter(MemoData.id==memoData.id).first()
+    Debug.log(oldData.toDict())
+    Debug.log(memoData.toDict())
+    oldData.title = memoData.title
+    oldData.body = memoData.body
+    session.commit()

@@ -10,6 +10,7 @@ import { dark } from '@material-ui/core/styles/createPalette';
 import { Palette } from '@material-ui/icons';
 import { Console } from 'console';
 import { Link } from 'react-router-dom';
+import MemoData from './MemoData'
 
 const fontFamily = [
   "Noto Sans JP",
@@ -124,15 +125,11 @@ function SimpleSnackbar() {
   );
 }
 
-class MemoData{
-  title:string = "";
-  body:string = "";
-}
-
 interface HeaderProps{
   handleClick:()=>void;
   snackbarTextHandle:(snackbarText:string) => void;
   memoData:MemoData;
+  editMode:"insert"|"update";
 }
 
 function Header(props:HeaderProps){
@@ -144,16 +141,15 @@ function Header(props:HeaderProps){
         <Toolbar>
           <Link to="/" style={{textDecoration:"none"}}>
             <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={() => {
-              console.log(props.memoData);
               props.handleClick();
               props.snackbarTextHandle("メニュー表示");
               if(props.memoData.title !== "" && props.memoData.body !== ""){
-                fetch("http://localhost:8080/",{
+                fetch("http://192.168.1.5:8080/" + (props.editMode === "update"?"update":""),{
                   method:"POST",
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({title:props.memoData.title,body:props.memoData.body}),
+                  body: JSON.stringify({id:props.memoData.id,title:props.memoData.title,body:props.memoData.body}),
                 })
                 .then(response => response.json())
                 .catch((error) => {console.log(error)});
@@ -175,12 +171,13 @@ interface BodyProps{
   handleClick:() => void;
   snackbarTextHandle:(snackbarText:string) => void;
   handleUpdateMemo:(title:string,body:string) => void;
+  memo:MemoData;
 }
 
 function Body(props:BodyProps){
   const classes = useStyles();
-  const [titleText,setTitleText] = useState("");
-  const [bodyText,setBodyText] = useState("");
+  const [titleText,setTitleText] = useState(props.memo.title);
+  const [bodyText,setBodyText] = useState(props.memo.body);
   return(
     <div>
       <div className={classes.appBarSpacer} />
@@ -228,6 +225,7 @@ interface AppState{
 
 class App extends React.Component<any,AppState>{
   memodata:MemoData;
+  editMode:"insert"|"update";
   constructor(props: AppState | Readonly<AppState>){
     super(props);
     this.state = {
@@ -238,7 +236,8 @@ class App extends React.Component<any,AppState>{
     this.handleClose = this.handleClose.bind(this);
     this.setSnackbarText = this.setSnackbarText.bind(this);
     this.handleUpdateMemo = this.handleUpdateMemo.bind(this);
-    this.memodata = new MemoData();
+    this.memodata = this.props.location.state.memoData;
+    this.editMode = this.props.location.state.editMode;
   }
   setSnackbarText(text:string){
     this.setState({
@@ -257,7 +256,6 @@ class App extends React.Component<any,AppState>{
   handleUpdateMemo(title:string,body:string){
     this.memodata.title = title;
     this.memodata.body = body;
-    console.log(this.memodata.title,this.memodata.body);
   }
 
   render(){
@@ -285,12 +283,12 @@ class App extends React.Component<any,AppState>{
         <Header snackbarTextHandle={this.setSnackbarText} handleClick={() => {
           this.setState({
             open:true,
-          }
-          );
+          });
         }}
         memoData={this.memodata}
+        editMode={this.editMode}
         />
-        <Body snackbarTextHandle={this.setSnackbarText} handleClick={()=>{this.setState({open:true})}} handleUpdateMemo={this.handleUpdateMemo}/>
+        <Body snackbarTextHandle={this.setSnackbarText} handleClick={()=>{this.setState({open:true})}} handleUpdateMemo={this.handleUpdateMemo} memo={this.memodata}/>
       </div>
     </MuiThemeProvider>
     );

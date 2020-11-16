@@ -10,6 +10,7 @@ import { dark } from '@material-ui/core/styles/createPalette';
 import { Palette } from '@material-ui/icons';
 import { Console } from 'console';
 import { Link } from 'react-router-dom';
+import MemoData from './MemoData';
 
 const fontFamily = [
   "Noto Sans JP",
@@ -158,16 +159,17 @@ interface PaperListItemProps{
     listItemSize: string | undefined;
     LinkSize:string | undefined;
   }
-  handleClick:() => void;
+  handleClick:(memo:MemoData) => void;
   memo:MemoData;
 }
 
 function PaperListItem(props:PaperListItemProps){
-  console.log(props.memo);
   return(
     <ListItem className={props.classes.listItemSize}>
       
-        <Paper className={props.classes.paperSize} onClick={props.handleClick}>
+        <Paper className={props.classes.paperSize} onClick={() => {
+          props.handleClick(props.memo);
+          }}>
           <Typography className={props.classes.paperTypoTitleSize} variant="h5" noWrap>
             {props.memo.title}
           </Typography>
@@ -188,15 +190,14 @@ interface CreatePaperItemsProps{
     listItemSize: string | undefined;
     LinkSize: string | undefined;
   }
-  handleClick:() => void;
+  handleClick:(memo:MemoData) => void;
   memoData:MemoData[];
 }
 
 function CreatePaperItems(props:CreatePaperItemsProps){
-  console.log(props.memoData);
   let itemList: JSX.Element[]=[];
   props.memoData.forEach((memo:MemoData) => {
-    itemList.push(PaperListItem({classes:props.classes,handleClick:props.handleClick,memo:memo}))
+    itemList.push(PaperListItem({classes:props.classes,handleClick:(memo:MemoData) => {props.handleClick(memo)},memo:memo}))
   })
   return(<>
     {itemList}
@@ -205,12 +206,11 @@ function CreatePaperItems(props:CreatePaperItemsProps){
 }
 
 interface BodyProps{
-  handleClick:() => void;
+  handleClick:(memo:MemoData,editMode:"insert"|"update") => void;
   memoData:MemoData[];
 }
 
 function Body(props:BodyProps){
-  console.log(props.memoData);
   const classes = useStyles();
   return(
     <div>
@@ -218,29 +218,18 @@ function Body(props:BodyProps){
           <Container>
             <TextField label="検索" className={classes.SearchfieldSize}/>
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
-              <CreatePaperItems classes={classes} memoData={props.memoData} handleClick={() =>{props.handleClick()}}/>
+              <CreatePaperItems classes={classes} memoData={props.memoData} handleClick={(memo:MemoData) =>{
+                props.handleClick(memo,"update")
+                }}/>
             </List>
-            <Link to="/editor">
-              <Fab color="primary" aria-label="add" className={classes.fab}>
-                <AddIcon />
-              </Fab>
-            </Link>
+            <Fab color="primary" aria-label="add" className={classes.fab} onClick={()=>{
+              props.handleClick(new MemoData(),"insert");
+              }}>
+              <AddIcon />
+            </Fab>
           </Container>
     </div>
   );
-}
-
-class MemoData{
-  id: number;
-  title: string;
-  body: string;
-  datetime: string;
-  constructor(){
-    this.id = 0;
-    this.title = ""
-    this.body = "";
-    this.datetime = "";
-  }
 }
 
 interface AppState{
@@ -248,6 +237,7 @@ interface AppState{
   snackbarText:string;
   snackbarTextHandle:(snackbarText:string) => void;
   jsonData : MemoData[];
+  memoData:MemoData;
 }
 
 class App extends React.Component<any,AppState>{
@@ -259,10 +249,11 @@ class App extends React.Component<any,AppState>{
       snackbarText:"",
       snackbarTextHandle:this.setSnackbarText,
       jsonData:[],
+      memoData:new MemoData(),
     };
     this.handleClose = this.handleClose.bind(this);
     this.setSnackbarText = this.setSnackbarText.bind(this);
-    fetch("http://localhost:8080/getAll",{
+    fetch("http://192.168.1.5:8080/getAll",{
       method:"GET"
     })
     .then(response => response.json())
@@ -277,7 +268,6 @@ class App extends React.Component<any,AppState>{
     this.setState({
       jsonData:j,
     })
-    console.log(this.state.jsonData);
   }
   setSnackbarText(text:string){
     this.setState({
@@ -320,10 +310,14 @@ class App extends React.Component<any,AppState>{
             open:true,
           });
         }}/>
-        <Body memoData={this.state.jsonData} handleClick={()=>{
+        <Body memoData={this.state.jsonData} handleClick={(memo:MemoData,editMode:"insert"|"update")=>{
+          console.log(memo);
           this.props.history.push({
-            "/editor",
-            state:{id=}
+            pathname:"/editor",
+            state:{
+              memoData : memo,
+              editMode : editMode,
+            }
           });
         }}/>
       </div>
