@@ -166,7 +166,7 @@ function PaperListItem(props:PaperListItemProps){
   console.log(props.memo);
   return(
     <ListItem className={props.classes.listItemSize}>
-      <Link to="/editor" className={props.classes.LinkSize}>
+      
         <Paper className={props.classes.paperSize} onClick={props.handleClick}>
           <Typography className={props.classes.paperTypoTitleSize} variant="h5" noWrap>
             {props.memo.title}
@@ -175,7 +175,7 @@ function PaperListItem(props:PaperListItemProps){
             {props.memo.body}
           </Typography>
         </Paper>
-      </Link>
+      
     </ListItem>
   );
 }
@@ -206,7 +206,6 @@ function CreatePaperItems(props:CreatePaperItemsProps){
 
 interface BodyProps{
   handleClick:() => void;
-  snackbarTextHandle:(snackbarText:string) => void;
   memoData:MemoData[];
 }
 
@@ -219,7 +218,7 @@ function Body(props:BodyProps){
           <Container>
             <TextField label="検索" className={classes.SearchfieldSize}/>
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
-              <CreatePaperItems classes={classes} memoData={props.memoData} handleClick={() =>{props.handleClick();props.snackbarTextHandle("編集画面へ遷移")}}/>
+              <CreatePaperItems classes={classes} memoData={props.memoData} handleClick={() =>{props.handleClick()}}/>
             </List>
             <Link to="/editor">
               <Fab color="primary" aria-label="add" className={classes.fab}>
@@ -321,7 +320,12 @@ class App extends React.Component<any,AppState>{
             open:true,
           });
         }}/>
-        <Body snackbarTextHandle={this.setSnackbarText} memoData={this.state.jsonData} handleClick={()=>{this.setState({open:true})}}/>
+        <Body memoData={this.state.jsonData} handleClick={()=>{
+          this.props.history.push({
+            "/editor",
+            state:{id=}
+          });
+        }}/>
       </div>
     </MuiThemeProvider>
     );
