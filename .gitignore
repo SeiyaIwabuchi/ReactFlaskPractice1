@@ -1,6 +1,6 @@
 front/node_modules
 back/env
-**/*.pyc
+.pyc
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
