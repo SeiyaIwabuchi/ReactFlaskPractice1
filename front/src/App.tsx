@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Axios from 'axios';
 import { AppBar, Button, Container, CssBaseline, Fab, IconButton, List, ListItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles'
@@ -208,17 +208,23 @@ function CreatePaperItems(props:CreatePaperItemsProps){
 interface BodyProps{
   handleClick:(memo:MemoData,editMode:"insert"|"update") => void;
   memoData:MemoData[];
+  setMemoData:(memos:MemoData[]) => void;
 }
 
 function Body(props:BodyProps){
   const classes = useStyles();
+  const [textFieldValue,setTextFieldValue] = useState("");
+  const [memoData2,setMemoData2] = useState(props.memoData);
   return(
     <div>
       <div className={classes.appBarSpacer} />
           <Container>
-            <TextField label="検索" className={classes.SearchfieldSize}/>
+            <TextField label="検索" value={textFieldValue} className={classes.SearchfieldSize} onChange={(event) => {
+              setTextFieldValue(event.target.value);
+              setMemoData2(memoFilter(props.memoData,event.target.value));
+            }}/>
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
-              <CreatePaperItems classes={classes} memoData={props.memoData} handleClick={(memo:MemoData) =>{
+              <CreatePaperItems classes={classes} memoData={textFieldValue !== "" ? memoData2 : props.memoData} handleClick={(memo:MemoData) =>{
                 props.handleClick(memo,"update")
                 }}/>
             </List>
@@ -232,12 +238,21 @@ function Body(props:BodyProps){
   );
 }
 
+function memoFilter(memos:MemoData[],keyword:string) : MemoData[]{
+  let retList:MemoData[] = [];
+    memos.forEach(memo => {
+      if(memo.title.indexOf(keyword) !== -1){
+        if(retList.indexOf(memo) === -1) retList.push(memo)
+      }
+    });
+  return retList;
+}
+
 interface AppState{
   open:boolean;
   snackbarText:string;
   snackbarTextHandle:(snackbarText:string) => void;
   jsonData : MemoData[];
-  memoData:MemoData;
 }
 
 class App extends React.Component<any,AppState>{
@@ -249,7 +264,6 @@ class App extends React.Component<any,AppState>{
       snackbarText:"",
       snackbarTextHandle:this.setSnackbarText,
       jsonData:[],
-      memoData:new MemoData(),
     };
     this.handleClose = this.handleClose.bind(this);
     this.setSnackbarText = this.setSnackbarText.bind(this);
@@ -263,7 +277,6 @@ class App extends React.Component<any,AppState>{
     .catch((error) => {
       console.error('Error: ', error);
     });
-    console.log("コンストラクタが呼ばれた");
   }
   setJsonData(j:MemoData[]){
     this.setState({
@@ -320,7 +333,13 @@ class App extends React.Component<any,AppState>{
               editMode : editMode,
             }
           });
-        }}/>
+        }}
+        setMemoData={(memos:MemoData[]) => {
+          this.setState({
+            jsonData:memos,
+          });
+        }}
+        />
       </div>
     </MuiThemeProvider>
     );
