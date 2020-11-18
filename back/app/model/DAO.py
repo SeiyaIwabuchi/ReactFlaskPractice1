@@ -13,33 +13,49 @@ engine=create_engine("mysql://docker:docker@192.168.1.124:3306/test_database?cha
 Base=declarative_base()
 Base.metadata.create_all(bind=engine, checkfirst=False)
 SessionClass=sessionmaker(engine) #セッションを作るクラスを作成
-session=SessionClass()
-Debug.log("Complete database initialize.")
+
+class MySessionClass(sessionmaker):
+    def __enter__(self):
+        Debug.log("Connect to Database.")
+        return self
+    
+    def __exit__(self, ex_type, ex_value, trace):
+        self.close_all()
+        Debug.log("Close Database session.")
+
+with MySessionClass(engine) as session:
+    Debug.log("Connected to Database.")
 
 def clearAll():
     #データクリア
-    for r in session.query(MemoData).all():
-        session.delete(r)
+    with MySessionClass(engine) as session:
+        for r in session.query(MemoData).all():
+            session.delete(r)
         session.commit()
 
 def insertOne(memoData:MemoData):
-    session.add(memoData)
-    try:
-        session.commit()
-    except ProgrammingError as e:
-        pass
+    with MySessionClass(engine) as session:
+        session.add(memoData)
+        try:
+            session.commit()
+        except ProgrammingError:
+            pass
 
 def getAll(memoData:MemoData):
-    return session.query(MemoData).all()
+    with MySessionClass(engine) as session:
+        data = session.query(MemoData).all()
+    return data
 
 def deleteOne(memoData:MemoData):
-    session.delete(memoData)
-    session.commit()
+    with MySessionClass(engine) as session:
+        session.delete(memoData)
+        session.commit()
 
 def updateOne(memoData:MemoData):
-    oldData:MemoData = session.query(MemoData).filter(MemoData.id==memoData.id).first()
-    Debug.log(oldData.toDict())
-    Debug.log(memoData.toDict())
-    oldData.title = memoData.title
-    oldData.body = memoData.body
-    session.commit()
+    with MySessionClass(engine) as session:
+        oldData:MemoData = session.query(MemoData).filter(MemoData.id==memoData.id).first()
+        Debug.log(oldData.toDict())
+        Debug.log(memoData.toDict())
+        oldData.title = memoData.title
+        oldData.body = memoData.body
+        session.commit()
