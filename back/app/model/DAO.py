@@ -63,3 +63,8 @@ def updateOne(memoData:MemoData):
         oldData.title = memoData.title
         oldData.body = memoData.body
         session.commit()
+
+def getOne(filter) -> MemoData:
+    with MySessionClass(SessionClass()) as session:
+        memo = session.query(MemoData).filter(filter).first()
+    return memo

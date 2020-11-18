@@ -7,7 +7,7 @@ from flask import Flask,Blueprint,request,jsonify
 
 mod_getAll = Blueprint("getAll",__name__)
 
-@mod_getAll.route("/getAll")
+@mod_getAll.route("/",methods=["GET"])
 def index():
     memos = []
     for n in DAO.getAll():

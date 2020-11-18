@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppBar, Button, Container, CssBaseline, Fab, IconButton, Input, List, ListItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, Container, CssBaseline, Fab, IconButton, Input, List, ListItem, Menu, MenuItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles'
 import CloseIcon from '@material-ui/icons/Close';
 import * as Colors from '@material-ui/core/colors';
@@ -8,6 +8,7 @@ import AddIcon from '@material-ui/icons/Add';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { dark } from '@material-ui/core/styles/createPalette';
 import { Palette } from '@material-ui/icons';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { Console } from 'console';
 import { Link } from 'react-router-dom';
 import MemoData from './MemoData'
@@ -130,11 +131,12 @@ interface HeaderProps{
   snackbarTextHandle:(snackbarText:string) => void;
   memoData:MemoData;
   editMode:"insert"|"update";
+  history:any;
 }
 
 function Header(props:HeaderProps){
   const classes = useStyles();
-
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   return (
     <header>
       <AppBar className={classes.appBar} position="fixed">
@@ -144,8 +146,8 @@ function Header(props:HeaderProps){
               props.handleClick();
               props.snackbarTextHandle("メニュー表示");
               if(props.memoData.title !== "" && props.memoData.body !== ""){
-                fetch("http://iwabuchi.ddns.net:8080/" + (props.editMode === "update"?"update":""),{
-                  method:"POST",
+                fetch("http://iwabuchi.ddns.net:8080/",{
+                  method:(props.editMode === "update"?"PUT":"POST"),
                   headers: {
                     'Content-Type': 'application/json',
                   },
@@ -161,6 +163,36 @@ function Header(props:HeaderProps){
           <Typography variant="h6" className={classes.title}>
             メモメモメ
           </Typography>
+            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={(event:React.MouseEvent<HTMLButtonElement>) => {
+                setAnchorEl(event.currentTarget);
+              }}>
+              <MoreVertIcon color="action" style={{
+                textAlign:"right"
+              }}/>
+            </IconButton>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={()=>{setAnchorEl(null);}}
+            >
+              <MenuItem onClick={()=>{
+                  setAnchorEl(null);
+                  if(props.memoData.title !== "" && props.memoData.body !== ""){
+                    fetch("http://iwabuchi.ddns.net:8080/",{
+                      method:(props.editMode === "update"?"DELETE":"POST"),
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({id:props.memoData.id,title:props.memoData.title,body:props.memoData.body}),
+                    })
+                    .then(response => response.json())
+                    .catch((error) => {console.log(error)});
+                    props.history.replace("/")
+                  }
+                }}>削除</MenuItem>
+            </Menu>
         </Toolbar>
       </AppBar>
     </header>
@@ -280,7 +312,7 @@ class App extends React.Component<any,AppState>{
           }
         />
         <CssBaseline />
-        <Header snackbarTextHandle={this.setSnackbarText} handleClick={() => {
+        <Header history={this.props.history} snackbarTextHandle={this.setSnackbarText} handleClick={() => {
           this.setState({
             open:true,
           });

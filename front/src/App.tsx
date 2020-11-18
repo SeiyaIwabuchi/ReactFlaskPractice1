@@ -253,8 +253,8 @@ class App extends React.Component<any,AppState>{
     };
     this.handleClose = this.handleClose.bind(this);
     this.setSnackbarText = this.setSnackbarText.bind(this);
-    fetch("http://iwabuchi.ddns.net:8080/getAll",{
-      method:"GET"
+    fetch("http://iwabuchi.ddns.net:8080/",{
+      method:'get'
     })
     .then(response => response.json())
     .then((data:MemoData[]) => {
@@ -263,6 +263,7 @@ class App extends React.Component<any,AppState>{
     .catch((error) => {
       console.error('Error: ', error);
     });
+    console.log("コンストラクタが呼ばれた");
   }
   setJsonData(j:MemoData[]){
     this.setState({
