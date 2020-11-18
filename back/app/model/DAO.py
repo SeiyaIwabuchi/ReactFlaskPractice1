@@ -13,8 +13,9 @@ engine=create_engine("mysql://docker:docker@192.168.1.124:3306/test_database?cha
 Base=declarative_base()
 Base.metadata.create_all(bind=engine, checkfirst=False)
 SessionClass=sessionmaker(engine) #セッションを作るクラスを作成
-
-class MySessionClass(sessionmaker):
+session = SessionClass()
+print(session.__class__)
+class MySessionClass(session.__class__):
     def __enter__(self):
         Debug.log("Connect to Database.")
         return self
@@ -28,8 +29,8 @@ with MySessionClass(engine) as session:
 
 def clearAll():
     #データクリア
-    with MySessionClass(engine) as session:
-        for r in session.query(MemoData).all():
+    with MySessionClass(engine).Session() as session:
+        for r in session.Session.query(MemoData).all():
             session.delete(r)
         session.commit()
 
@@ -41,7 +42,7 @@ def insertOne(memoData:MemoData):
         except ProgrammingError:
             pass
 
-def getAll(memoData:MemoData):
+def getAll():
     with MySessionClass(engine) as session:
         data = session.query(MemoData).all()
     return data
@@ -59,3 +60,5 @@ def updateOne(memoData:MemoData):
         oldData.title = memoData.title
         oldData.body = memoData.body
         session.commit()
+
+getAll()
