@@ -10,7 +10,7 @@ mod_getAll = Blueprint("getAll",__name__)
 @mod_getAll.route("/getAll")
 def index():
     memos = []
-    for n in DAO.getAll(MemoData()):
+    for n in DAO.getAll():
         memos.append(n.toDict())
     j = jsonify(memos)
     return j
