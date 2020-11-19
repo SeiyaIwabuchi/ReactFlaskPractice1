@@ -7,6 +7,7 @@ from .view.getAll import mod_getAll
 from .view.delete import mod_delete
 # Define the WSGI application object
 app = Flask(__name__)
+app.secret_key = "seiya"
 CORS(app)
 app.register_blueprint(mod_create)
 app.register_blueprint(mod_update)

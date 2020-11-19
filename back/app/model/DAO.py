@@ -9,6 +9,7 @@ import datetime
 from sqlalchemy.orm import sessionmaker
 from.MemoData import MemoData
 import inspect
+from .infosTable import infosTable
 
 engine=create_engine("mysql://docker:docker@192.168.1.124:3306/test_database?charset=utf8")
 Base=declarative_base()
@@ -45,9 +46,9 @@ def insertOne(memoData:MemoData):
         except ProgrammingError:
             pass
 
-def getAll():
+def getAll(filter):
     with MySessionClass(SessionClass()) as session:
-        data = session.query(MemoData).all()
+        data = session.query(MemoData).filter(filter).all()
     return data
 
 def deleteOne(memoData:MemoData):
@@ -68,3 +69,15 @@ def getOne(filter) -> MemoData:
     with MySessionClass(SessionClass()) as session:
         memo = session.query(MemoData).filter(filter).first()
     return memo
+
+def getNextId():
+    with MySessionClass(SessionClass()) as session:
+        nextId = int(session.query(infosTable).filter(infosTable.keyName == "nextUserId").first().value)
+    return nextId
+
+def incrementId():
+    with MySessionClass(SessionClass()) as session:
+        nextId = session.query(infosTable).filter(infosTable.keyName == "nextUserId").first()
+        nextId.value = str(int(nextId.value)+1)
+        session.commit()
+    return nextId

@@ -146,7 +146,7 @@ function Header(props:HeaderProps){
               props.handleClick();
               props.snackbarTextHandle("メニュー表示");
               if(props.memoData.title !== "" && props.memoData.body !== ""){
-                fetch("http://iwabuchi.ddns.net:8080/",{
+                fetch("http://localhost:8080/",{
                   method:(props.editMode === "update"?"PUT":"POST"),
                   headers: {
                     'Content-Type': 'application/json',
@@ -180,7 +180,7 @@ function Header(props:HeaderProps){
               <MenuItem onClick={()=>{
                   setAnchorEl(null);
                   if(props.memoData.title !== "" && props.memoData.body !== ""){
-                    fetch("http://iwabuchi.ddns.net:8080/",{
+                    fetch("http://localhost:8080/",{
                       method:(props.editMode === "update"?"DELETE":"POST"),
                       headers: {
                         'Content-Type': 'application/json',

@@ -267,7 +267,7 @@ class App extends React.Component<any,AppState>{
     };
     this.handleClose = this.handleClose.bind(this);
     this.setSnackbarText = this.setSnackbarText.bind(this);
-    fetch("http://iwabuchi.ddns.net:8080/",{
+    fetch("http://localhost:8080/",{
       method:'get'
     })
     .then(response => response.json())
