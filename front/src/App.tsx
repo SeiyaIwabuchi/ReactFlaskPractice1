@@ -347,7 +347,7 @@ class App extends React.Component<any,AppState>{
         }}
         setMemoData={(memos:MemoData[]) => {
           this.setState({
-            jsonData:memos,
+            jsonData:memos.concat(),
           });
         }}
         />
