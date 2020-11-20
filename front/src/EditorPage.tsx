@@ -12,6 +12,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { Console } from 'console';
 import { Link } from 'react-router-dom';
 import MemoData from './MemoData'
+import Session from './Session';
 
 const fontFamily = [
   "Noto Sans JP",
@@ -132,6 +133,7 @@ interface HeaderProps{
   memoData:MemoData;
   editMode:"insert"|"update";
   history:any;
+  session:Session,
 }
 
 function Header(props:HeaderProps){
@@ -146,12 +148,12 @@ function Header(props:HeaderProps){
               props.handleClick();
               props.snackbarTextHandle("メニュー表示");
               if(props.memoData.title !== "" && props.memoData.body !== ""){
-                fetch("http://localhost:8080/",{
+                fetch("http://iwabuchi.ddns.net:8080/",{
                   method:(props.editMode === "update"?"PUT":"POST"),
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({id:props.memoData.id,title:props.memoData.title,body:props.memoData.body}),
+                  body: JSON.stringify({uid:props.session.getUid(),id:props.memoData.id,title:props.memoData.title,body:props.memoData.body}),
                 })
                 .then(response => response.json())
                 .catch((error) => {console.log(error)});
@@ -180,12 +182,12 @@ function Header(props:HeaderProps){
               <MenuItem onClick={()=>{
                   setAnchorEl(null);
                   if(props.memoData.title !== "" && props.memoData.body !== ""){
-                    fetch("http://localhost:8080/",{
+                    fetch("http://iwabuchi.ddns.net:8080/",{
                       method:(props.editMode === "update"?"DELETE":"POST"),
                       headers: {
                         'Content-Type': 'application/json',
                       },
-                      body: JSON.stringify({id:props.memoData.id,title:props.memoData.title,body:props.memoData.body}),
+                      body: JSON.stringify({uid:props.session.getUid(),id:props.memoData.id}),
                     })
                     .then(response => response.json())
                     .catch((error) => {console.log(error)});
@@ -258,6 +260,7 @@ interface AppState{
 class App extends React.Component<any,AppState>{
   memodata:MemoData;
   editMode:"insert"|"update";
+  session:Session;
   constructor(props: AppState | Readonly<AppState>){
     super(props);
     this.state = {
@@ -270,6 +273,7 @@ class App extends React.Component<any,AppState>{
     this.handleUpdateMemo = this.handleUpdateMemo.bind(this);
     this.memodata = this.props.location.state.memoData;
     this.editMode = this.props.location.state.editMode;
+    this.session = this.props.location.state.session;
   }
   setSnackbarText(text:string){
     this.setState({
@@ -319,6 +323,7 @@ class App extends React.Component<any,AppState>{
         }}
         memoData={this.memodata}
         editMode={this.editMode}
+        session={this.session}
         />
         <Body snackbarTextHandle={this.setSnackbarText} handleClick={()=>{this.setState({open:true})}} handleUpdateMemo={this.handleUpdateMemo} memo={this.memodata}/>
       </div>

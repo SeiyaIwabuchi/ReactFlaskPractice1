@@ -12,6 +12,7 @@ class MemoData(Base):
 
     def toDict(self):
         return {
+            "user":self.user,
             "id":self.id,
             "title":self.title,
             "body":self.body,

@@ -11,9 +11,11 @@ mod_getAll = Blueprint("getAll",__name__)
 @mod_getAll.route("/",methods=["GET"])
 def index():
     session = Session(request)
-    session.uid
-    memos = []
-    for n in DAO.getAll(MemoData.user == int(session.uid)):
-        memos.append(n.toDict())
-    j = jsonify(memos)
+    responseJson = {
+        "uid":session.uid,
+        "memos":[]
+        }
+    for n in DAO.getAll(MemoData.user == session.uid):
+        responseJson["memos"].append(n.toDict())
+    j = jsonify(responseJson)
     return j

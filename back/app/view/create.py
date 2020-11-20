@@ -10,6 +10,15 @@ mod_create = Blueprint("create",__name__)
 @mod_create.route('/',methods=["POST"])
 def index():
     json = loads(request.data.decode("UTF-8"))
-    memo = MemoData(title=json["title"],body=json["body"],datetime=datetime.now())
+    nextMemoId = DAO.getNextMemoId(MemoData.user == json["uid"])
+    nextMemoId = 0 if nextMemoId == None else nextMemoId[0]+1
+    memo = MemoData(
+        user=json["uid"],
+        id=nextMemoId,
+        title=json["title"],
+        body=json["body"],
+        datetime=datetime.now()
+        )
+    Debug.log(DAO.getNextMemoId(MemoData.user == json["uid"]))
     DAO.insertOne(memo)
     return ""

@@ -1,12 +1,12 @@
-from .DAO import getNextId,incrementId
-class IdManager:
+from . import DAO
+class UserIdManager:
     @staticmethod
     def getNextId():
-        nextId = getNextId()
-        incrementId()
+        nextId = DAO.getNextUserId()
+        DAO.incrementUserId()
         return nextId
 
     @staticmethod
     def getNextIdWithoutincrement():
-        nextId = getNextId()
+        nextId = DAO.getNextUserId()
         return nextId

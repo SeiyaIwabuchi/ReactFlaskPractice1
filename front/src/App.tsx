@@ -11,6 +11,8 @@ import { Palette } from '@material-ui/icons';
 import { Console } from 'console';
 import { Link } from 'react-router-dom';
 import MemoData from './MemoData';
+import Session from './Session';
+import ResponseJsonInterface from './ResponseJsonInterface'
 
 const fontFamily = [
   "Noto Sans JP",
@@ -253,6 +255,7 @@ interface AppState{
   snackbarText:string;
   snackbarTextHandle:(snackbarText:string) => void;
   jsonData : MemoData[];
+  session:Session;
 }
 
 class App extends React.Component<any,AppState>{
@@ -264,15 +267,22 @@ class App extends React.Component<any,AppState>{
       snackbarText:"",
       snackbarTextHandle:this.setSnackbarText,
       jsonData:[],
+      session:new Session(""),
     };
     this.handleClose = this.handleClose.bind(this);
     this.setSnackbarText = this.setSnackbarText.bind(this);
-    fetch("http://localhost:8080/",{
-      method:'get'
+    const tsession = localStorage.getItem("uid");
+    if (tsession != null){
+      this.state.session.setUid(tsession);
+    }
+    fetch("http://iwabuchi.ddns.net:8080/?uid=" + this.state.session.getUid(),{
+      method:'get',
     })
     .then(response => response.json())
-    .then((data:MemoData[]) => {
-      this.setJsonData(data);
+    .then((data:ResponseJsonInterface) => {
+      this.setJsonData(data.memos);
+      this.setState({session:new Session(data.uid)});
+      localStorage.setItem("uid",this.state.session.getUid());
     })
     .catch((error) => {
       console.error('Error: ', error);
@@ -331,6 +341,7 @@ class App extends React.Component<any,AppState>{
             state:{
               memoData : memo,
               editMode : editMode,
+              session : this.state.session,
             }
           });
         }}

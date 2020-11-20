@@ -10,6 +10,12 @@ mod_update = Blueprint("update",__name__)
 @mod_update.route('/',methods=["PUT"])
 def index():
     json = loads(request.data.decode("UTF-8"))
-    memo = MemoData(id=json["id"],title=json["title"],body=json["body"],datetime=datetime.now())
+    memo = MemoData(
+        user=json["uid"],
+        id=json["id"],
+        title=json["title"],
+        body=json["body"],
+        datetime=datetime.now()
+        )
     DAO.updateOne(memo)
     return ""

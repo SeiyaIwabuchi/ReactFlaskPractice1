@@ -10,6 +10,6 @@ mod_delete = Blueprint("delete",__name__)
 @mod_delete.route('/',methods=["DELETE"])
 def index():
     json = loads(request.data.decode("UTF-8"))
-    memo = DAO.getOne(MemoData.id == json["id"])
+    memo = DAO.getOne(MemoData.id == json["id"],MemoData.user == json["uid"])
     DAO.deleteOne(memo)
     return ""
