@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { AppBar, Container, CssBaseline, Fab, IconButton, List, ListItem, Paper, Snackbar, TextField, Toolbar, Typography } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles'
 import CloseIcon from '@material-ui/icons/Close';
@@ -228,18 +228,23 @@ function App(props:IAppProps){
   if (tsession != null){
     session.setUid(tsession);
   }
-  fetch("http://iwabuchi.ddns.net:8080/?uid=" + session.getUid(),{
-    method:'get',
-  })
-  .then(response => response.json())
-  .then((data:ResponseJsonInterface) => {
-    setJsonData(data.memos);
-    setSession(new Session(data.uid));
-    localStorage.setItem("uid",session.getUid());
-  })
-  .catch((error) => {
-    console.error('Error: ', error);
-  });
+  useEffect(() => {
+    const fetchMemoData = async () => {
+      await fetch("http://iwabuchi.ddns.net:8080/?uid=" + session.getUid(), {
+        method: 'get',
+      })
+        .then(response => response.json())
+        .then((data: ResponseJsonInterface) => {
+          setJsonData(data.memos);
+          setSession(new Session(data.uid));
+          localStorage.setItem("uid", session.getUid());
+        })
+        .catch((error) => {
+          console.error('Error: ', error);
+        });
+    }
+    fetchMemoData();
+  },[]);
   return (
     <MuiThemeProvider theme={theme}>
     <div>
