@@ -96,8 +96,8 @@ function Header(props:HeaderProps){
             メモメモメ
           </Typography>
           <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => {
-            props.handleClick();
-            props.snackbarTextHandle("メニュー表示");
+            if(props.themeSwitch === "dark") props.setThemeSwitch("light");
+            else props.setThemeSwitch("dark");
           }}>
             <Brightness7Icon/>
           </IconButton>
