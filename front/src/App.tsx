@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import Axios from 'axios';
 import { AppBar, Button, Container, CssBaseline, Fab, IconButton, List, ListItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles'
@@ -250,111 +250,98 @@ function memoFilter(memos:MemoData[],keyword:string) : MemoData[]{
   return retList;
 }
 
-interface AppState{
-  open:boolean;
-  snackbarText:string;
-  snackbarTextHandle:(snackbarText:string) => void;
-  jsonData : MemoData[];
+interface IHistoryState{
+  memoData:MemoData;
+  editMode:"insert"|"update";
   session:Session;
 }
 
-class App extends React.Component<any,AppState>{
-  
-  constructor(props: AppState | Readonly<AppState>){
-    super(props);
-    this.state = {
-      open:false,
-      snackbarText:"",
-      snackbarTextHandle:this.setSnackbarText,
-      jsonData:[],
-      session:new Session(""),
-    };
-    this.handleClose = this.handleClose.bind(this);
-    this.setSnackbarText = this.setSnackbarText.bind(this);
-    const tsession = localStorage.getItem("uid");
-    if (tsession != null){
-      this.state.session.setUid(tsession);
-    }
-    fetch("http://iwabuchi.ddns.net:8080/?uid=" + this.state.session.getUid(),{
-      method:'get',
-    })
-    .then(response => response.json())
-    .then((data:ResponseJsonInterface) => {
-      this.setJsonData(data.memos);
-      this.setState({session:new Session(data.uid)});
-      localStorage.setItem("uid",this.state.session.getUid());
-    })
-    .catch((error) => {
-      console.error('Error: ', error);
-    });
-  }
-  setJsonData(j:MemoData[]){
-    this.setState({
-      jsonData:j,
-    })
-  }
-  setSnackbarText(text:string){
-    this.setState({
-      snackbarText:text,
-    });
-  }
-  handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string){
-    if (reason === 'clickaway') {
-      return;
-    }
-    this.setState({
-      open:false,
-    }
-    );
-  };
-  render(){
-    return (
-      <MuiThemeProvider theme={theme}>
-      <div>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          open={this.state.open}
-          autoHideDuration={6000}
-          onClose={this.handleClose}
-          message={this.state.snackbarText}
-          action={
-            <React.Fragment>
-              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleClose}>
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </React.Fragment>
-          }
-        />
-        <CssBaseline />
-        <Header snackbarTextHandle={this.setSnackbarText} handleClick={() => {
-          this.setState({
-            open:true,
-          });
-        }}/>
-        <Body memoData={this.state.jsonData} handleClick={(memo:MemoData,editMode:"insert"|"update")=>{
-          console.log(memo);
-          this.props.history.push({
-            pathname:"/editor",
-            state:{
-              memoData : memo,
-              editMode : editMode,
-              session : this.state.session,
-            }
-          });
-        }}
-        setMemoData={(memos:MemoData[]) => {
-          this.setState({
-            jsonData:memos.concat(),
-          });
-        }}
-        />
-      </div>
-    </MuiThemeProvider>
-    );
-  }
+interface IHistory{
+  pathname:string;
+  state:IHistoryState;
 }
+
+interface IAppProps{
+  history:IHistory[];
+}
+
+function App(props:IAppProps){
+  const [open,setOpen] = useState(false);
+  const [snackbarText,setSnackbarText] = useState("");
+  const [jsonData,setJsonData] = useState<MemoData[]>([]);
+  const [session,setSession] = useState(new Session(""));
+  const tsession = localStorage.getItem("uid");
+  if (tsession != null){
+    session.setUid(tsession);
+  }
+  fetch("http://iwabuchi.ddns.net:8080/?uid=" + session.getUid(),{
+    method:'get',
+  })
+  .then(response => response.json())
+  .then((data:ResponseJsonInterface) => {
+    setJsonData(data.memos);
+    setSession(new Session(data.uid));
+    localStorage.setItem("uid",session.getUid());
+  })
+  .catch((error) => {
+    console.error('Error: ', error);
+  });
+  return (
+    <MuiThemeProvider theme={theme}>
+    <div>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={open}
+        autoHideDuration={6000}
+        onClose={
+          (event: React.SyntheticEvent | React.MouseEvent,reason?: string) => {
+            handleClose(event,setOpen,reason);
+          }}
+        message={snackbarText}
+        action={
+          <React.Fragment>
+            <IconButton size="small" aria-label="close" color="inherit" onClick={
+              (event: React.SyntheticEvent | React.MouseEvent,reason?: string) => {
+                handleClose(event,setOpen,reason);
+              }
+            }>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+      />
+      <CssBaseline />
+      <Header snackbarTextHandle={setSnackbarText} handleClick={() => {
+        setOpen(true);
+      }}/>
+      <Body memoData={jsonData} handleClick={(memo:MemoData,editMode:"insert"|"update")=>{
+        console.log(memo);
+        props.history.push({
+          pathname:"/editor",
+          state:{
+            memoData : memo,
+            editMode : editMode,
+            session : session,
+          }
+        });
+      }}
+      setMemoData={(memos:MemoData[]) => {
+        setJsonData(memos.concat());
+      }}
+      />
+    </div>
+  </MuiThemeProvider>
+  );
+}
+
+function handleClose(event: React.SyntheticEvent | React.MouseEvent,setOpen:Dispatch<SetStateAction<boolean>>,reason?: string){
+  if (reason === 'clickaway') {
+    return;
+  }
+  setOpen(false);
+};
 
 export default App;
