@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import MemoData from './MemoData';
 import Session from './Session';
 import ResponseJsonInterface from './ResponseJsonInterface'
+import IHistory from './IHistory';
 
 const fontFamily = [
   "Noto Sans JP",
@@ -250,17 +251,6 @@ function memoFilter(memos:MemoData[],keyword:string) : MemoData[]{
   return retList;
 }
 
-interface IHistoryState{
-  memoData:MemoData;
-  editMode:"insert"|"update";
-  session:Session;
-}
-
-interface IHistory{
-  pathname:string;
-  state:IHistoryState;
-}
-
 interface IAppProps{
   history:IHistory[];
 }
@@ -304,8 +294,8 @@ function App(props:IAppProps){
         action={
           <React.Fragment>
             <IconButton size="small" aria-label="close" color="inherit" onClick={
-              (event: React.SyntheticEvent | React.MouseEvent,reason?: string) => {
-                handleClose(event,setOpen,reason);
+              (event: React.SyntheticEvent | React.MouseEvent) => {
+                handleClose(event,setOpen);
               }
             }>
               <CloseIcon fontSize="small" />

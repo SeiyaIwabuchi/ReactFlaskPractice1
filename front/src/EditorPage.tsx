@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { AppBar, Button, Container, CssBaseline, Fab, IconButton, Input, List, ListItem, Menu, MenuItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
+import React, { Dispatch, SetStateAction, SyntheticEvent, useState } from 'react';
+import { AppBar, Button, Container, CssBaseline, Fab, IconButton, Input, List, ListItem, Menu, MenuItem, Paper, Snackbar, SnackbarCloseReason, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles'
 import CloseIcon from '@material-ui/icons/Close';
 import * as Colors from '@material-ui/core/colors';
@@ -13,6 +13,8 @@ import { Console } from 'console';
 import { Link } from 'react-router-dom';
 import MemoData from './MemoData'
 import Session from './Session';
+import IHistory from './IHistory';
+import IHistoryState from './IHistoryState';
 
 const fontFamily = [
   "Noto Sans JP",
@@ -204,7 +206,6 @@ function Header(props:HeaderProps){
 interface BodyProps{
   handleClick:() => void;
   snackbarTextHandle:(snackbarText:string) => void;
-  handleUpdateMemo:(title:string,body:string) => void;
   memo:MemoData;
 }
 
@@ -226,7 +227,7 @@ function Body(props:BodyProps){
             value={titleText}
             onChange={(event)=>{
               setTitleText(event.target.value);
-              props.handleUpdateMemo(event.target.value,bodyText);
+              props.memo.title = event.target.value;
             }}
           />
           <br/>
@@ -242,7 +243,7 @@ function Body(props:BodyProps){
             value={bodyText}
             onChange={(event)=>{
               setBodyText(event.target.value);
-              props.handleUpdateMemo(titleText,event.target.value);
+              props.memo.body = event.target.value;
             }}
           />
           </Paper>
@@ -251,85 +252,64 @@ function Body(props:BodyProps){
   );
 }
 
-interface AppState{
-  open:boolean;
-  snackbarText:string;
-  snackbarTextHandle:(snackbarText:string) => void;
+interface IAppState{
+  location:{state:IHistoryState};
+  history:IHistory[];
 }
 
-class App extends React.Component<any,AppState>{
-  memodata:MemoData;
-  editMode:"insert"|"update";
-  session:Session;
-  constructor(props: AppState | Readonly<AppState>){
-    super(props);
-    this.state = {
-      open:false,
-      snackbarText:"",
-      snackbarTextHandle:this.setSnackbarText,
-    };
-    this.handleClose = this.handleClose.bind(this);
-    this.setSnackbarText = this.setSnackbarText.bind(this);
-    this.handleUpdateMemo = this.handleUpdateMemo.bind(this);
-    this.memodata = this.props.location.state.memoData;
-    this.editMode = this.props.location.state.editMode;
-    this.session = this.props.location.state.session;
-  }
-  setSnackbarText(text:string){
-    this.setState({
-      snackbarText:text,
-    });
-  }
-  handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string){
-    if (reason === 'clickaway') {
-      return;
-    }
-    this.setState({
-      open:false,
-    }
-    );
-  };
-  handleUpdateMemo(title:string,body:string){
-    this.memodata.title = title;
-    this.memodata.body = body;
-  }
-
-  render(){
-    return (
-      <MuiThemeProvider theme={theme}>
+function App(props: IAppState) {
+  let memodata: MemoData = props.location.state.memoData;
+  let editMode: "insert" | "update" = props.location.state.editMode;
+  let session: Session = props.location.state.session;
+  const [open, setOpen] = useState(false);
+  const [snackbarText, setSnackBarText] = useState("");
+  return (
+    <MuiThemeProvider theme={theme}>
       <div>
         <Snackbar
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'left',
           }}
-          open={this.state.open}
+          open={open}
           autoHideDuration={6000}
-          onClose={this.handleClose}
-          message={this.state.snackbarText}
+          onClose={(event: SyntheticEvent<any, Event>, reason: SnackbarCloseReason) => {
+            handleClose(event,setOpen,reason);
+          }}
+          message={snackbarText}
           action={
             <React.Fragment>
-              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleClose}>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                handleClose(event,setOpen);
+              }}>
                 <CloseIcon fontSize="small" />
               </IconButton>
             </React.Fragment>
           }
         />
         <CssBaseline />
-        <Header history={this.props.history} snackbarTextHandle={this.setSnackbarText} handleClick={() => {
-          this.setState({
-            open:true,
-          });
+        <Header history={props.history} snackbarTextHandle={setSnackBarText} handleClick={() => {
+          setOpen(true);
         }}
-        memoData={this.memodata}
-        editMode={this.editMode}
-        session={this.session}
+          memoData={memodata}
+          editMode={editMode}
+          session={session}
         />
-        <Body snackbarTextHandle={this.setSnackbarText} handleClick={()=>{this.setState({open:true})}} handleUpdateMemo={this.handleUpdateMemo} memo={this.memodata}/>
+        <Body snackbarTextHandle={setSnackBarText} handleClick={() => { setOpen(true); }} memo={memodata} />
       </div>
     </MuiThemeProvider>
-    );
-  }
+  );
 }
+
+function handleClose(
+  event: React.SyntheticEvent | React.MouseEvent, 
+  setOpen:Dispatch<SetStateAction<boolean>>, 
+  reason ?: string
+  ){
+  if (reason === 'clickaway') {
+    return;
+  }
+  setOpen(false);
+};
 
 export default App;
