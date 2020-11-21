@@ -244,8 +244,8 @@ function Body(props:BodyProps){
 function memoFilter(memos:MemoData[],keyword:string) : MemoData[]{
   let retList:MemoData[] = [];
     memos.forEach(memo => {
-      if(memo.title.indexOf(keyword) !== -1){
-        if(retList.indexOf(memo) === -1) retList.push(memo)
+      if(memo.title.indexOf(keyword) !== -1 || memo.body.indexOf(keyword) !== -1){
+        retList.push(memo)
       }
     });
   return retList;
