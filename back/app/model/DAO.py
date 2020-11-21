@@ -10,10 +10,6 @@ from sqlalchemy.orm import sessionmaker
 from.MemoData import MemoData
 import inspect
 from .infosTable import infosTable
-import logging
-
-logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 engine=create_engine("mysql://docker:docker@192.168.1.124:3306/test_database?charset=utf8")
 Base=declarative_base()

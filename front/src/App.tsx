@@ -1,19 +1,15 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import Axios from 'axios';
-import { AppBar, Button, Container, CssBaseline, Fab, IconButton, List, ListItem, Paper, Snackbar, SnackbarProps, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Container, CssBaseline, Fab, IconButton, List, ListItem, Paper, Snackbar, TextField, Toolbar, Typography } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles'
 import CloseIcon from '@material-ui/icons/Close';
 import * as Colors from '@material-ui/core/colors';
 import MenuIcon from '@material-ui/icons/Menu';
 import AddIcon from '@material-ui/icons/Add';
-import { dark } from '@material-ui/core/styles/createPalette';
-import { Palette } from '@material-ui/icons';
-import { Console } from 'console';
-import { Link } from 'react-router-dom';
 import MemoData from './MemoData';
 import Session from './Session';
 import ResponseJsonInterface from './ResponseJsonInterface'
 import IHistory from './IHistory';
+import Brightness7Icon from '@material-ui/icons/Brightness7';
 
 const fontFamily = [
   "Noto Sans JP",
@@ -30,16 +26,6 @@ const fontFamily = [
   "MS PGothic",
   "sans-serif",
 ].join(",");
-
-const theme = createMuiTheme({
-  typography: {
-    fontFamily: fontFamily,
-  },
-  palette: {
-    primary:Colors.grey,
-    type:"dark",
-  },
-});
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -85,51 +71,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function SimpleSnackbar() {
-  const [open, setOpen] = React.useState(false);
-
-  const handleClick = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (event: React.SyntheticEvent | React.MouseEvent, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setOpen(false);
-  };
-
-  return (
-    <div>
-      <Button onClick={handleClick}>Open simple snackbar</Button>
-      <Snackbar
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        message="Note archived"
-        action={
-          <React.Fragment>
-            <Button color="secondary" size="small" onClick={handleClose}>
-              UNDO
-            </Button>
-            <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </React.Fragment>
-        }
-      />
-    </div>
-  );
-}
 
 interface HeaderProps{
   handleClick:()=>void;
   snackbarTextHandle:(snackbarText:string) => void;
+  themeSwitch:"dark" | "light" | undefined;
+  setThemeSwitch:(next:"dark" | "light" | undefined) => void;
 }
 
 function Header(props:HeaderProps){
@@ -148,6 +95,12 @@ function Header(props:HeaderProps){
           <Typography variant="h6" className={classes.title}>
             メモメモメ
           </Typography>
+          <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => {
+            props.handleClick();
+            props.snackbarTextHandle("メニュー表示");
+          }}>
+            <Brightness7Icon/>
+          </IconButton>
         </Toolbar>
       </AppBar>
     </header>
@@ -256,11 +209,22 @@ interface IAppProps{
 }
 
 function App(props:IAppProps){
+  console.log("コンストラクタが呼ばれた！");
   const [open,setOpen] = useState(false);
   const [snackbarText,setSnackbarText] = useState("");
   const [jsonData,setJsonData] = useState<MemoData[]>([]);
   const [session,setSession] = useState(new Session(""));
+  const [themeSwitch,setThemeSwitch] = useState<"dark" | "light" | undefined>("dark");
   const tsession = localStorage.getItem("uid");
+  const theme = createMuiTheme({
+    typography: {
+      fontFamily: fontFamily,
+    },
+    palette: {
+      primary:Colors.grey,
+      type:themeSwitch,
+    },
+  });
   if (tsession != null){
     session.setUid(tsession);
   }
@@ -288,14 +252,14 @@ function App(props:IAppProps){
         autoHideDuration={6000}
         onClose={
           (event: React.SyntheticEvent | React.MouseEvent,reason?: string) => {
-            handleClose(event,setOpen,reason);
+            handleClose(setOpen,reason);
           }}
         message={snackbarText}
         action={
           <React.Fragment>
             <IconButton size="small" aria-label="close" color="inherit" onClick={
-              (event: React.SyntheticEvent | React.MouseEvent) => {
-                handleClose(event,setOpen);
+              () => {
+                handleClose(setOpen);
               }
             }>
               <CloseIcon fontSize="small" />
@@ -306,7 +270,10 @@ function App(props:IAppProps){
       <CssBaseline />
       <Header snackbarTextHandle={setSnackbarText} handleClick={() => {
         setOpen(true);
-      }}/>
+      }}
+      themeSwitch = {themeSwitch}
+      setThemeSwitch = {setThemeSwitch}
+      />
       <Body memoData={jsonData} handleClick={(memo:MemoData,editMode:"insert"|"update")=>{
         console.log(memo);
         props.history.push({
@@ -327,7 +294,7 @@ function App(props:IAppProps){
   );
 }
 
-function handleClose(event: React.SyntheticEvent | React.MouseEvent,setOpen:Dispatch<SetStateAction<boolean>>,reason?: string){
+function handleClose(setOpen:Dispatch<SetStateAction<boolean>>,reason?: string){
   if (reason === 'clickaway') {
     return;
   }
