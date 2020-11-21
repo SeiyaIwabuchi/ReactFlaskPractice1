@@ -237,7 +237,8 @@ function App(props:IAppProps){
         .then((data: ResponseJsonInterface) => {
           setJsonData(data.memos);
           setSession(new Session(data.uid));
-          localStorage.setItem("uid", session.getUid());
+          localStorage.setItem("uid", data.uid);
+          console.log(localStorage.getItem("uid"));
         })
         .catch((error) => {
           console.error('Error: ', error);
